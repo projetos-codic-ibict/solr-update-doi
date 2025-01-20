@@ -13,6 +13,3 @@ pip install pysolr
 ```bash
 ./run.sh
 ```
-# solr-update-doi
-# solr-update-doi
-# solr-update-doi
