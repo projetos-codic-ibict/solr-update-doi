@@ -6,7 +6,7 @@ solr_url = 'http://localhost:8080/solr/biblio'  # Substitua pelo URL do seu Solr
 solr = pysolr.Solr(solr_url, timeout=600)
 
 # Caminho para o arquivo .tsv
-arquivo_tsv = './oasisbr_doi.tsv'  # Substitua pelo caminho do seu arquivo .tsv
+arquivo_tsv = '/home/jesielsilva/oasisbr_doi.tsv'  # Substitua pelo caminho do seu arquivo .tsv
 
 # Caminho para o arquivo de log
 arquivo_log = 'log.txt'  # Nome do arquivo de log
@@ -34,8 +34,6 @@ try:
             # title = colunas[2]
             # year = colunas[3]
 
-            print(f"Processando: oasisbr_id={oasisbr_id}, doi={doi}")
-
             # Consulta o documento pelo oasisbr_id
             results = solr.search(f'id:{oasisbr_id}')
 
@@ -56,11 +54,8 @@ try:
                     print(f"Documento {oasisbr_id} atualizado com o campo 'dc.identifier.doi.none.fl_str_mv': {doi}")
                 else:
                     registrar_log(f"O campo 'dc.identifier.doi.none.fl_str_mv' já existe no documento {oasisbr_id}")
-                    print(f"O campo 'dc.identifier.doi.none.fl_str_mv' já existe no documento {oasisbr_id}. Valor atual: {documento['dc.identifier.doi.none.fl_str_mv']}")
             else:
                 registrar_log(f"Nenhum documento encontrado com o ID: {oasisbr_id}")
-                print(f"Nenhum documento encontrado com o ID: {oasisbr_id}")
 
 except Exception as e:
     registrar_log(f"Erro ao processar o arquivo ou atualizar o Solr: {e}")
-    print(f"Erro ao processar o arquivo ou atualizar o Solr: {e}")
