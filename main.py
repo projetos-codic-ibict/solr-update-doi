@@ -3,7 +3,7 @@ import pysolr
 
 # Configuração do Solr
 solr_url = 'http://localhost:8080/solr/biblio'  # Substitua pelo URL do seu Solr e nome do core
-solr = pysolr.Solr(solr_url, timeout=600)
+solr = pysolr.Solr(solr_url, timeout=60)
 
 # Caminho para o arquivo .tsv
 arquivo_tsv = '/home/jesielsilva/oasisbr_doi.tsv'  # Substitua pelo caminho do seu arquivo .tsv
