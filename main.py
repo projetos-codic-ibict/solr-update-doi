@@ -24,6 +24,10 @@ try:
     # Abre o arquivo .tsv e processa cada linha
     with open(arquivo_tsv, 'r', encoding='utf-8') as file:
         next(file)  # Pula o cabeçalho (se houver)
+        
+        contador_atualizacoes = 0  # Contador para controlar o número de atualizações
+        documentos_atualizados = []  # Lista para armazenar os documentos atualizados
+
         for linha in file:
             # Divide a linha em colunas
             colunas = linha.strip().split('\t')
@@ -46,15 +50,31 @@ try:
                     # Adiciona o novo campo "dc.identifier.doi.none.fl_str_mv" ao documento
                     documento['dc.identifier.doi.none.fl_str_mv'] = doi
 
-                    # Atualiza o documento no Solr
-                    solr.add([documento])  # Envia o documento atualizado de volta ao Solr
-                    solr.commit()  # Confirma a atualização
+                    # Adiciona o documento atualizado à lista
+                    documentos_atualizados.append(documento)
+                    contador_atualizacoes += 1
 
                     registrar_log(f"Documento {oasisbr_id} atualizado com o campo 'dc.identifier.doi.none.fl_str_mv': {doi}")
                 else:
                     registrar_log(f"O campo 'dc.identifier.doi.none.fl_str_mv' já existe no documento {oasisbr_id}")
             else:
                 registrar_log(f"Nenhum documento encontrado com o ID: {oasisbr_id}")
+
+            # Realiza o commit a cada 1000 registros atualizados
+            if contador_atualizacoes >= 1000:
+                solr.add(documentos_atualizados)  # Envia os documentos atualizados de volta ao Solr
+                solr.commit()  # Confirma a atualização
+                registrar_log(f"Commit realizado para {contador_atualizacoes} documentos atualizados.")
+                
+                # Reinicia o contador e a lista de documentos atualizados
+                contador_atualizacoes = 0
+                documentos_atualizados = []
+
+        # Realiza o commit final para os documentos restantes que não atingiram 1000
+        if contador_atualizacoes > 0:
+            solr.add(documentos_atualizados)  # Envia os documentos atualizados de volta ao Solr
+            solr.commit()  # Confirma a atualização
+            registrar_log(f"Commit final realizado para {contador_atualizacoes} documentos atualizados.")
 
 except Exception as e:
     registrar_log(f"Erro ao processar o arquivo ou atualizar o Solr: {e}")
