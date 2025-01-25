@@ -62,7 +62,7 @@ try:
                     registrar_log(f"Nenhum documento encontrado com o ID: {oasisbr_id}")
 
                 # Realiza o commit a cada 1000 registros atualizados
-                if contador_atualizacoes >= 10:
+                if contador_atualizacoes >= 1000:
                     solr.add(documentos_atualizados)  # Envia os documentos atualizados de volta ao Solr
                     solr.commit()  # Confirma a atualização
                     registrar_log(f"Commit realizado para {contador_atualizacoes} documentos atualizados.")
@@ -73,6 +73,9 @@ try:
 
             except Exception as e:
                 registrar_log(f"Erro ao processar o registro {oasisbr_id}: {e}")
+                # Reinicia o contador e a lista de documentos atualizados
+                contador_atualizacoes = 0
+                documentos_atualizados = []
 
 
         # Realiza o commit final para os documentos restantes que não atingiram 1000
