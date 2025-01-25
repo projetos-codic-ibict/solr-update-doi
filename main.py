@@ -73,7 +73,7 @@ try:
 
             except Exception as e:
                 registrar_log(f"Erro ao processar o registro {oasisbr_id}: {e}")
-                continue  # Continua para o próximo registro
+
 
         # Realiza o commit final para os documentos restantes que não atingiram 1000
         if contador_atualizacoes > 0:
