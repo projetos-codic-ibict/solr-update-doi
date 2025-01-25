@@ -29,46 +29,51 @@ try:
         documentos_atualizados = []  # Lista para armazenar os documentos atualizados
 
         for linha in file:
-            # Divide a linha em colunas
-            colunas = linha.strip().split('\t')
+            try:
+                # Divide a linha em colunas
+                colunas = linha.strip().split('\t')
 
-            # Extrai os dados
-            doi = colunas[0]
-            oasisbr_id = colunas[1]
-            # title = colunas[2]
-            # year = colunas[3]
+                # Extrai os dados
+                doi = colunas[0]
+                oasisbr_id = colunas[1]
+                # title = colunas[2]
+                # year = colunas[3]
 
-            # Consulta o documento pelo oasisbr_id
-            results = solr.search(f'id:{oasisbr_id}')
+                # Consulta o documento pelo oasisbr_id
+                results = solr.search(f'id:{oasisbr_id}')
 
-            # Verifica se o documento foi encontrado
-            if len(results) > 0:
-                documento = results.docs[0]  # Pega o primeiro documento retornado
+                # Verifica se o documento foi encontrado
+                if len(results) > 0:
+                    documento = results.docs[0]  # Pega o primeiro documento retornado
 
-                # Verifica se o campo "dc.identifier.doi.none.fl_str_mv" já existe no documento
-                if 'dc.identifier.doi.none.fl_str_mv' not in documento:
-                    # Adiciona o novo campo "dc.identifier.doi.none.fl_str_mv" ao documento
-                    documento['dc.identifier.doi.none.fl_str_mv'] = doi
+                    # Verifica se o campo "dc.identifier.doi.none.fl_str_mv" já existe no documento
+                    if 'dc.identifier.doi.none.fl_str_mv' not in documento:
+                        # Adiciona o novo campo "dc.identifier.doi.none.fl_str_mv" ao documento
+                        documento['dc.identifier.doi.none.fl_str_mv'] = doi
 
-                    # Adiciona o documento atualizado à lista
-                    documentos_atualizados.append(documento)
-                    contador_atualizacoes += 1
+                        # Adiciona o documento atualizado à lista
+                        documentos_atualizados.append(documento)
+                        contador_atualizacoes += 1
 
-                    registrar_log(f"Documento {oasisbr_id} atualizado com o campo 'dc.identifier.doi.none.fl_str_mv': {doi}")
+                        registrar_log(f"Documento {oasisbr_id} atualizado com o campo 'dc.identifier.doi.none.fl_str_mv': {doi}")
+                    else:
+                        registrar_log(f"O campo 'dc.identifier.doi.none.fl_str_mv' já existe no documento {oasisbr_id}")
                 else:
-                    registrar_log(f"O campo 'dc.identifier.doi.none.fl_str_mv' já existe no documento {oasisbr_id}")
-            else:
-                registrar_log(f"Nenhum documento encontrado com o ID: {oasisbr_id}")
+                    registrar_log(f"Nenhum documento encontrado com o ID: {oasisbr_id}")
 
-            # Realiza o commit a cada 1000 registros atualizados
-            if contador_atualizacoes >= 1000:
-                solr.add(documentos_atualizados)  # Envia os documentos atualizados de volta ao Solr
-                solr.commit()  # Confirma a atualização
-                registrar_log(f"Commit realizado para {contador_atualizacoes} documentos atualizados.")
-                
-                # Reinicia o contador e a lista de documentos atualizados
-                contador_atualizacoes = 0
-                documentos_atualizados = []
+                # Realiza o commit a cada 1000 registros atualizados
+                if contador_atualizacoes >= 1000:
+                    solr.add(documentos_atualizados)  # Envia os documentos atualizados de volta ao Solr
+                    solr.commit()  # Confirma a atualização
+                    registrar_log(f"Commit realizado para {contador_atualizacoes} documentos atualizados.")
+                    
+                    # Reinicia o contador e a lista de documentos atualizados
+                    contador_atualizacoes = 0
+                    documentos_atualizados = []
+
+            except Exception as e:
+                registrar_log(f"Erro ao processar o registro {oasisbr_id}: {e}")
+                continue  # Continua para o próximo registro
 
         # Realiza o commit final para os documentos restantes que não atingiram 1000
         if contador_atualizacoes > 0:
@@ -77,4 +82,4 @@ try:
             registrar_log(f"Commit final realizado para {contador_atualizacoes} documentos atualizados.")
 
 except Exception as e:
-    registrar_log(f"Erro ao processar o arquivo ou atualizar o Solr: {e}")
+    registrar_log(f"Erro geral ao processar o arquivo ou atualizar o Solr: {e}")
