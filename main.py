@@ -25,6 +25,7 @@ try:
     with open(arquivo_tsv, 'r', encoding='utf-8') as file:
         next(file)  # Pula o cabeçalho (se houver)
         
+        contador_doi = 0  # Contador de registros com DOIs
         contador_atualizacoes = 0  # Contador para controlar o número de atualizações
         documentos_atualizados = []  # Lista para armazenar os documentos atualizados
 
@@ -57,6 +58,7 @@ try:
 
                         registrar_log(f"Documento {oasisbr_id} atualizado com o campo 'dc.identifier.doi.none.fl_str_mv': {doi}")
                     else:
+                        contador_doi += 1
                         registrar_log(f"O campo 'dc.identifier.doi.none.fl_str_mv' já existe no documento {oasisbr_id}")
                 else:
                     registrar_log(f"Nenhum documento encontrado com o ID: {oasisbr_id}")
@@ -67,6 +69,7 @@ try:
                     solr.commit()  # Confirma a atualização
                     registrar_log(f"Commit realizado para {contador_atualizacoes} documentos atualizados.")
                     
+                    contador_doi = contador_doi + contador_atualizacoes
                     # Reinicia o contador e a lista de documentos atualizados
                     contador_atualizacoes = 0
                     documentos_atualizados = []
@@ -83,6 +86,8 @@ try:
             solr.add(documentos_atualizados)  # Envia os documentos atualizados de volta ao Solr
             solr.commit()  # Confirma a atualização
             registrar_log(f"Commit final realizado para {contador_atualizacoes} documentos atualizados.")
+        registrar_log(f"Total de registros com DOIs: {contador_doi}")
 
 except Exception as e:
+    registrar_log(f"Total de registros com DOIs: {contador_doi}")
     registrar_log(f"Erro geral ao processar o arquivo ou atualizar o Solr: {e}")
