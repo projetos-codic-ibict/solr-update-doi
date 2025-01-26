@@ -1,5 +1,10 @@
 from datetime import datetime
 import pysolr
+from dotenv import load_dotenv
+import os
+
+# Carrega as variáveis de ambiente do arquivo .env
+load_dotenv()
 
 # Configuração do Solr
 solr_url = 'http://localhost:8080/solr/biblio'  # Substitua pelo URL do seu Solr e nome do core
@@ -10,6 +15,10 @@ arquivo_tsv = '/home/jesielsilva/oasisbr_doi.tsv'  # Substitua pelo caminho do s
 
 # Caminho para o arquivo de log
 arquivo_log = 'log.txt'  # Nome do arquivo de log
+
+# Lê a variável de ambiente QTD_REGISTROS_COMMIT e define 1000 como valor padrão
+qtd_registros_por_commit = int(os.getenv('QTD_REGISTROS_COMMIT', 1000))
+print(f"Quantidade de registros por commit: {qtd_registros_por_commit}")
 
 # Função para registrar logs
 def registrar_log(mensagem):
@@ -63,8 +72,8 @@ try:
                 else:
                     registrar_log(f"Nenhum documento encontrado com o ID: {oasisbr_id}")
 
-                # Realiza o commit a cada 1000 registros atualizados
-                if contador_atualizacoes >= 10:
+                # Realiza o commit a cada x registros atualizados
+                if contador_atualizacoes >= qtd_registros_por_commit:
                     solr.add(documentos_atualizados)  # Envia os documentos atualizados de volta ao Solr
                     solr.commit()  # Confirma a atualização
                     registrar_log(f"Commit realizado para {contador_atualizacoes} documentos atualizados.")
