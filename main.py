@@ -18,7 +18,6 @@ arquivo_log = 'log.txt'  # Nome do arquivo de log
 
 # Lê a variável de ambiente QTD_REGISTROS_COMMIT e define 1000 como valor padrão
 qtd_registros_por_commit = int(os.getenv('QTD_REGISTROS_COMMIT', 1000))
-print(f"Quantidade de registros por commit: {qtd_registros_por_commit}")
 
 # Função para registrar logs
 def registrar_log(mensagem):
